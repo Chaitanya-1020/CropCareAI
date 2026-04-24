@@ -1,0 +1,50 @@
+name: CropCareAI ML Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ml-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas scikit-learn numpy joblib matplotlib seaborn
+
+      - name: Run ML Pipeline
+        run: |
+          python -c "
+          import pandas as pd
+          import numpy as np
+          from sklearn.ensemble import RandomForestClassifier
+          from sklearn.model_selection import train_test_split
+          from sklearn.metrics import accuracy_score
+          from sklearn.preprocessing import LabelEncoder
+
+          df = pd.read_csv('Crop_recommendation.csv')
+          le = LabelEncoder()
+          df['label_enc'] = le.fit_transform(df['label'])
+          X = df.drop(['label','label_enc'], axis=1)
+          y = df['label_enc']
+          X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+          model = RandomForestClassifier(n_estimators=100, random_state=42)
+          model.fit(X_train, y_train)
+          acc = accuracy_score(y_test, model.predict(X_test))
+          print(f'Model Accuracy: {acc*100:.2f}%')
+          assert acc > 0.95, 'Model accuracy too low!'
+          print('All tests passed!')
+          "
+
+      - name: Pipeline Success
+        run: echo "CropCareAI ML Pipeline completed successfully!"
