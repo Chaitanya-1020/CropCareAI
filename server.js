@@ -22,9 +22,9 @@ mongoose.connect(db, {}).then((con) => {
 });
 
 
-const portnumber = 3000;
+const portnumber = process.env.PORT || 3000;
 const server = app.listen(portnumber, () => {
-  console.log("App is running on port 3000");
+  console.log(`App is running on port ${portnumber}`);
 });
 
 process.on("unhandledRejection", (err) => {
