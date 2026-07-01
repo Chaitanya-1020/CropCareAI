@@ -1,0 +1,14 @@
+Flask
+flask-cors
+numpy
+opencv-python-headless
+joblib
+ultralytics
+scikit-learn
+googletrans==4.0.0rc1
+pandas
+google-generativeai
+Pillow
+moviepy
+torch
+torchvision

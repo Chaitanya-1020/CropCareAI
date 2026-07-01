@@ -532,7 +532,7 @@ import {
   Download,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../../api";
 import toast from "react-hot-toast";
 
 const UserProfile = () => {

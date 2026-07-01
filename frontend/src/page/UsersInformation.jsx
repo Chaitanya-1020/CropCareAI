@@ -15,8 +15,8 @@ const UsersInformation = () => {
   useEffect(() => {
     const fetchFarmerData = async () => {
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:3000/api/v1/farm/${id}`
+        const response = await api.get(
+          `${import.meta.env.VITE_API_URL}/farm/${id}`
         );
         setFarmerData(response.data.data.farmer);
         setLoading(false);

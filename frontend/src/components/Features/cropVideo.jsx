@@ -260,7 +260,7 @@ const VideoAnalysisPage = () => {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/detect_crop_disease_video",
+        `${import.meta.env.VITE_ML_API_URL}/detect_crop_disease_video`,
         {
           method: "POST",
           body: formData,

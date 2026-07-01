@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api";
 import userPhoto from "../../assets/avatars/user3.jpg";
 
 const AdminDashboard = () => {

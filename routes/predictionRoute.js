@@ -5,7 +5,7 @@ const multer = require("multer");
 const FormData = require("form-data");
 
 const translateMiddleware = require("./../controllers/translationController");
-const FLASK_SERVER_URL = "http://127.0.0.1:5000/";
+const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL;
 
 // Middleware to apply translation only if `lang` query parameter exists
 const conditionalTranslateMiddleware = (req, res, next) => {
@@ -59,7 +59,20 @@ router.get("/singlecrop", conditionalTranslateMiddleware, (req, res) => {
 });
 
 router.get("/predictfertilizer", conditionalTranslateMiddleware, (req, res) => {
-  const inputData = req.query.data.map(parseFloat);
+  console.log("Query:", req.query);
+  console.log("Data:", req.query.data);
+  const data = req.query.data || req.query["data[]"];
+
+if (!data) {
+    return res.status(400).json({
+        status: "error",
+        message: "No data received"
+    });
+}
+
+const inputData = Array.isArray(data)
+    ? data.map(Number)
+    : [Number(data)];
   axios
     .post(`${FLASK_SERVER_URL}/predict_fertilizer`, { data: inputData })
     .then((response) => res.json({ prediction: response.data.prediction }))
