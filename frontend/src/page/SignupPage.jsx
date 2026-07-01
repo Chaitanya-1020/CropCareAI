@@ -192,35 +192,47 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm())
-    {
-      try
-      {
-        setLoading(true);
-        const result = await signup(formData);
 
-        if (result.success)
-        {
-          setShowSuccessAlert(true);
-          setTimeout(() => {
-            setShowSuccessAlert(false);
-            navigate("/");
-          }, 2000);
-        } else
-        {
-          setLoginError(result.error || "Signup failed");
-          setTimeout(() => setLoginError(false), 5000);
+    console.log("===== HANDLE SUBMIT CALLED =====");
+    console.log("Current Form Data:", formData);
+
+    if (validateForm()) {
+        console.log("✅ Validation Passed");
+
+        try {
+            setLoading(true);
+
+            console.log("Sending signup request...");
+
+            const result = await signup(formData);
+
+            console.log("Signup Result:", result);
+
+            if (result.success) {
+                setShowSuccessAlert(true);
+
+                setTimeout(() => {
+                    setShowSuccessAlert(false);
+                    navigate("/");
+                }, 2000);
+            } else {
+                setLoginError(result.error || "Signup failed");
+                setTimeout(() => setLoginError(false), 5000);
+            }
+
+        } catch (error) {
+            console.error("Signup Exception:", error);
+
+            setLoginError(error.message || "Signup failed");
+            setTimeout(() => setLoginError(false), 5000);
+        } finally {
+            setLoading(false);
         }
-      } catch (error)
-      {
-        setLoginError(error.message || "Signup failed");
-        setTimeout(() => setLoginError(false), 5000);
-      } finally
-      {
-        setLoading(false);
-      }
+    } else {
+        console.log("❌ Validation Failed");
+        console.log(errors);
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-mycol-nyanza via-white to-mycol-celadon-2 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-5 transition-colors duration-200">

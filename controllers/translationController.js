@@ -12,7 +12,7 @@ const translateMiddleware = async (req, res, next) => {
       const targetLanguage = req.query.lang || "en";
 
       const translationResponse = await axios.post(
-        "https://cropcareai-2.onrender.comtranslate",
+        `${import.meta.env.VITE_FLASK_API_URL}/translate`,
         {
           text: JSON.stringify(data),
           lang: targetLanguage,
