@@ -35,7 +35,7 @@
 
 //     try {
 //       const response = await fetch(
-//         "http://127.0.0.1:5000/detect_crop_disease_video",
+//         "https://cropcareai-2.onrender.com/detect_crop_disease_video",
 //         {
 //           method: "POST",
 //           body: formData,
