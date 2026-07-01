@@ -12,7 +12,7 @@ const translateMiddleware = async (req, res, next) => {
       const targetLanguage = req.query.lang || "en";
 
       const translationResponse = await axios.post(
-        "http://127.0.0.1:5000/translate",
+        "https://cropcareai-2.onrender.comtranslate",
         {
           text: JSON.stringify(data),
           lang: targetLanguage,

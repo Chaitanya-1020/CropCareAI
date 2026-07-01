@@ -5,7 +5,7 @@ const multer = require("multer");
 const FormData = require("form-data");
 
 const translateMiddleware = require("./../controllers/translationController");
-const FLASK_SERVER_URL = process.env.FLASK_SERVER_URL;
+const FLASK_SERVER_URL = "https://cropcareai-2.onrender.com";
 
 // Middleware to apply translation only if `lang` query parameter exists
 const conditionalTranslateMiddleware = (req, res, next) => {
