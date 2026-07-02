@@ -17,6 +17,7 @@ from PIL import Image
 import logging
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import tempfile
+import traceback
 # Suppress warnings
 warnings.simplefilter("ignore", InconsistentVersionWarning)
 
