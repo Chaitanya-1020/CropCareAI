@@ -111,12 +111,17 @@ router.post(
 
       res.json(response.data);
     } catch (error) {
-      console.error("Crop Disease Detection Error:", error);
-      res.status(500).json({
+    console.error("========== FLASK ERROR ==========");
+    console.error(error.response?.status);
+    console.error(error.response?.data);
+    console.error(error.message);
+
+    res.status(error.response?.status || 500).json({
         error: "Crop disease detection failed",
-        details: error.message,
-      });
-    }
+        flask: error.response?.data,
+        message: error.message
+    });
+}
   }
 );
 
