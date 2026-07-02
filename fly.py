@@ -18,6 +18,7 @@ import logging
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import tempfile
 import traceback
+
 # Suppress warnings
 warnings.simplefilter("ignore", InconsistentVersionWarning)
 
@@ -55,75 +56,62 @@ with open('description.json', 'r') as file:
 with open('diseasedescription.json', 'r') as file:
     disease_info = json.load(file)
 
-@app.route('/detect_crop_disease_video', methods=['POST'])
-def detect_crop_disease_video():
+@app.route('/detect_crop_disease', methods=['POST'])
+def detect_crop_disease():
     try:
-        if 'video' not in request.files:
-            return jsonify({'error': 'No video provided', 'message': 'No video uploaded'}), 400
-        
-        video_file = request.files['video']
-        temp_video = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
-        video_file.save(temp_video.name)
-        temp_video.close()
+        # Receive base64 encoded image or file upload
+        if 'image' in request.files:
+            # File upload method
+            file = request.files['image']
+            img_bytes = file.read()
+            nparr = np.frombuffer(img_bytes, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        cap = cv2.VideoCapture(temp_video.name)
-        if not cap.isOpened():
-            return jsonify({'error': 'Failed to open video', 'message': 'Invalid video file'}), 400
+        elif request.json and 'image' in request.json:
+            # Base64 encoded image method
+            image_base64 = request.json.get('image')
+            image_bytes = base64.b64decode(image_base64)
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        unique_diseases = {}  # Track count, max confidence, and info
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
+        else:
+            return jsonify({
+                'error': 'No image provided',
+                'message': 'No image uploaded'
+            }), 400
 
-            results = disease_model.predict(source=frame, conf=0.25)
+        # Run inference
+        results = disease_model.predict(source=image, conf=0.25)
 
-            for result in results:
-                for box in result.boxes:
-                    disease_class = disease_model.names[int(box.cls)]
-                    confidence = box.conf.item()
-                    disease_info = get_disease_info(disease_class)
+        # Prepare response
+        disease_predictions = []
 
-                    # Update count and max confidence
-                    if disease_class in unique_diseases:
-                        unique_diseases[disease_class]['count'] += 1
-                        if confidence > unique_diseases[disease_class]['max_confidence']:
-                            unique_diseases[disease_class]['max_confidence'] = confidence
-                    else:
-                        unique_diseases[disease_class] = {
-                            'count': 1,
-                            'max_confidence': confidence,
-                            'info': disease_info
-                        }
+        for result in results:
+            for box in result.boxes:
+                disease_class = disease_model.names[int(box.cls)]
+                confidence = box.conf.item()
+                disease_info = get_disease_info(disease_class)
 
-        cap.release()
-        os.unlink(temp_video.name)
-
-        # Convert to list and sort by count (descending), then confidence (descending)
-        unique_predictions = [
-            {
-                'disease': disease,
-                'count': details['count'],
-                'confidence': details['max_confidence'],
-                'info': details['info']
-            }
-            for disease, details in unique_diseases.items()
-        ]
-
-        # Sort by most frequent, then by highest confidence
-        sorted_predictions = sorted(
-            unique_predictions,
-            key=lambda x: (-x['count'], -x['confidence'])
-        )
+                disease_predictions.append({
+                    'disease': disease_class,
+                    'confidence': float(confidence),
+                    'info': disease_info
+                })
 
         return jsonify({
-            'predictions': sorted_predictions,
-            'message': 'Crop disease detection from video completed'
+            'predictions': disease_predictions,
+            'message': 'Crop disease detection completed'
         }), 200
 
     except Exception as e:
-        return jsonify({'error': str(e), 'message': 'Crop disease detection from video failed'}), 500
+        print("===== CROP DISEASE ERROR =====")
+        traceback.print_exc()
 
+        return jsonify({
+            'error': str(e),
+            'message': 'Crop disease detection failed'
+        }), 500
+    
 def translate_batch(texts: Union[str, List[str]], dest: str = 'mr') -> Union[str, List[str]]:
     """
     Translate a single text or list of texts to the target language.
@@ -196,8 +184,7 @@ def translate_endpoint():
         return jsonify({'error': str(e)}), 500
 
 # Load disease information
-with open('diseasedescription.json', 'r') as file:
-    disease_info = json.load(file)
+
 
 def get_disease_info(disease_name):
     # Normalize the disease name for comparison
@@ -207,56 +194,7 @@ def get_disease_info(disease_name):
             return disease
     return None
 
-@app.route('/detect_crop_disease', methods=['POST'])
-def detect_crop_disease():
-    try:
-        # Receive base64 encoded image or file upload
-        if 'image' in request.files:
-            # File upload method
-            file = request.files['image']
-            img_bytes = file.read()
-            nparr = np.frombuffer(img_bytes, np.uint8)
-            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        elif request.json and 'image' in request.json:
-            # Base64 encoded image method
-            image_base64 = request.json.get('image')
-            image_bytes = base64.b64decode(image_base64)
-            nparr = np.frombuffer(image_bytes, np.uint8)
-            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        else:
-            return jsonify({'error': 'No image provided', 'message': 'No image uploaded'}), 400
-        
-        # Run inference (assuming disease_model is defined elsewhere)
-        results = disease_model.predict(source=image, conf=0.25)
-        
-        # Prepare response
-        disease_predictions = []
-        for result in results:
-            for box in result.boxes:
-                disease_class = disease_model.names[int(box.cls)]
-                confidence = box.conf.item()
-                disease_info = get_disease_info(disease_class)
-                disease_predictions.append({
-                    'disease': disease_class,
-                    'confidence': float(confidence),
-                    'info': disease_info
-                })
-        
-        return jsonify({
-            'predictions': disease_predictions,
-            'message': 'Crop disease detection completed'
-        }), 200
-    
-    import traceback
 
-except Exception as e:
-    print("===== CROP DISEASE ERROR =====")
-    traceback.print_exc()
-
-    return jsonify({
-        "error": str(e),
-        "message": "Crop disease detection failed"
-    }), 500
 @app.route('/withinfo_predict_crop', methods=['POST'])
 def withinfo_predict_crop():
     try:
