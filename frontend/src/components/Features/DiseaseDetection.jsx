@@ -82,7 +82,7 @@ const DiseaseDetection = () => {
                 config.params = { lang: selectedLanguage };
             }
 
-            const response = await axios.post(
+            const response = await api.post(
                 "/crops/detect-crop-disease",
                 formData,
                 config
