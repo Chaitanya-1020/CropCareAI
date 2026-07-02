@@ -246,9 +246,16 @@ def detect_crop_disease():
             'message': 'Crop disease detection completed'
         }), 200
     
-    except Exception as e:
-        return jsonify({'error': str(e), 'message': 'Crop disease detection failed'}), 500
+    import traceback
 
+except Exception as e:
+    print("===== CROP DISEASE ERROR =====")
+    traceback.print_exc()
+
+    return jsonify({
+        "error": str(e),
+        "message": "Crop disease detection failed"
+    }), 500
 @app.route('/withinfo_predict_crop', methods=['POST'])
 def withinfo_predict_crop():
     try:
