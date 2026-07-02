@@ -26,11 +26,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 // ✅ FIXED CORS (works for both local + deployed frontend)
-app.use(cors({
-  origin: "*",   // allow all (simple & works everywhere)
-  credentials: true
-}));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://crop-care-ai-m6at.vercel.app",
+];
 
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app")
+    ) {
+      return callback(null, true);
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 // ================= ROUTES =================
 
 app.use("/api/v1/users", userRouter);
