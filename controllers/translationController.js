@@ -6,13 +6,15 @@ const translateMiddleware = async (req, res, next) => {
   }
 
   const originalJson = res.json;
+
   res.json = async function (data) {
     try {
       res.isTranslated = true;
+
       const targetLanguage = req.query.lang || "en";
 
       const translationResponse = await axios.post(
-        `${import.meta.env.FLASK_API_URL}/translate`,
+        `${process.env.FLASK_API_URL}/translate`,
         {
           text: JSON.stringify(data),
           lang: targetLanguage,
@@ -22,8 +24,10 @@ const translateMiddleware = async (req, res, next) => {
       const translatedData = JSON.parse(
         translationResponse.data.translated_text
       );
+
       originalJson.call(this, translatedData);
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
       originalJson.call(this, data);
     }
   };
