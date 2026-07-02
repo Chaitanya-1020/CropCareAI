@@ -12,7 +12,7 @@ const translateMiddleware = async (req, res, next) => {
       const targetLanguage = req.query.lang || "en";
 
       const translationResponse = await axios.post(
-        `${import.meta.env.VITE_FLASK_API_URL}/translate`,
+        `${import.meta.env.FLASK_API_URL}/translate`,
         {
           text: JSON.stringify(data),
           lang: targetLanguage,

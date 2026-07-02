@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cron = require("node-cron");
 process.on("uncaughtException", (err) => {
-  console.log(err.name, err.message);
-  console.log("UNCAUGHT EXCEPTION");
+  console.error(err.stack);
   process.exit(1);
 });
 
@@ -27,10 +26,7 @@ const server = app.listen(portnumber, () => {
   console.log(`App is running on port ${portnumber}`);
 });
 
-process.on("unhandledRejection", (err) => {
-  console.log(err.name, err.message);
-  console.log("UNHANDLED REJECTION");
-  server.close(() => {
-    process.exit(1);
-  });
+process.on("uncaughtException", (err) => {
+  console.error(err);
+  process.exit(1);
 });
