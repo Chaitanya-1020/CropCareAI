@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 // import { Link, Routes, Route } from "react-router-dom";
 import ProcessingAnimation from "../ProcessingAnimation";
 import DiseasesPanel from "./DiseasesPanel";
-import axios from "axios";
+import api from "../../api";
 import {
     Upload,
     AlertCircle,
@@ -83,7 +83,7 @@ const DiseaseDetection = () => {
             }
 
             const response = await axios.post(
-                "/api/v1/crops/detect-crop-disease",
+                "/crops/detect-crop-disease",
                 formData,
                 config
             );
