@@ -104,14 +104,14 @@ def detect_crop_disease():
         }), 200
 
     except Exception as e:
-        print("===== CROP DISEASE ERROR =====")
+        print("========== FULL ERROR ==========")
         traceback.print_exc()
+        print("===============================")
 
         return jsonify({
-            'error': str(e),
-            'message': 'Crop disease detection failed'
+            "error": str(e)
         }), 500
-    
+
 def translate_batch(texts: Union[str, List[str]], dest: str = 'mr') -> Union[str, List[str]]:
     """
     Translate a single text or list of texts to the target language.
